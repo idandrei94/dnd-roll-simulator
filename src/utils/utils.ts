@@ -49,19 +49,43 @@ const getAttackDamage: (type: 'miss' | 'hit' | 'crit', dice: (number | Dice)[], 
     }
 };
 
-
-export const performAttack: (player: Player, targetAc: number) => number = (player, targetAc) =>
+const calculateSeparateBonus: (player: Player, targetAc: number) => number = (player, targetAc) =>
 {
     const attackRollMod = player.expertise + player.weapon.modifier + player.strMod;
     const damageMod = player.strMod + player.weapon.modifier;
 
     const bonusAttackResult = checkAttackRoll(player.attackRollFunc(), player.critThreshold, attackRollMod, targetAc);
     const bonusDamage = getAttackDamage(bonusAttackResult, player.weapon.bonusDamageDice, damageMod, player.damageRollFunc);
-    const weaponDamage = new Array(player.attacks)
-        .fill(0).map(() =>
-            getAttackDamage(checkAttackRoll(player.attackRollFunc(), player.critThreshold, attackRollMod, targetAc), player.weapon.standardDamageDice, damageMod, player.damageRollFunc)
+    return bonusDamage;
+};
+
+const calculateIntegratedBonus: (player: Player, bestAttack: 'miss' | 'hit' | 'crit') => number = (player, bestAttack) =>
+{
+    return getAttackDamage(bestAttack, player.weapon.bonusDamageDice, 0, player.damageRollFunc);
+};
+
+export const performAttack: (player: Player, targetAc: number) => number = (player, targetAc) =>
+{
+
+    const attackRollMod = player.expertise + player.weapon.modifier + player.strMod;
+    const damageMod = player.strMod + player.weapon.modifier;
+
+    const attackRolls = new Array(player.attacks)
+        .fill(0)
+        .map(() => player.attackRollFunc());
+
+    const weaponDamage = attackRolls
+        .map((roll) =>
+            getAttackDamage(checkAttackRoll(roll, player.critThreshold, attackRollMod, targetAc), player.weapon.standardDamageDice, damageMod, player.damageRollFunc)
         )
         .reduce((acc, v) => acc + v, 0);
 
-    return bonusDamage + weaponDamage + player.bonusDamage.map(player.damageRollFunc).reduce((acc, v) => acc + v, 0);
+    return (player.weapon.bonusPartOfWeapon ?
+        calculateIntegratedBonus(player, checkAttackRoll(attackRolls.sort((a, b) => b - a)[0], player.critThreshold, attackRollMod, targetAc)) :
+        calculateSeparateBonus(player, targetAc)
+    )
+        + weaponDamage
+        + player.bonusDamage
+            .map(player.damageRollFunc)
+            .reduce((acc, v) => acc + v, 0);
 };

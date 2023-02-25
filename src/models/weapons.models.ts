@@ -5,4 +5,5 @@ export type Weapon = {
     bonusDamageDice: (number | Dice)[];
     modifier: number;
     name: string;
+    bonusPartOfWeapon?: boolean;
 };

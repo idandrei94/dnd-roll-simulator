@@ -1,7 +1,7 @@
 import { Player } from './models/player.models';
 import { getAdvantageAttackRoll, getDieRoll, getGreatWeaponDieRoll, getNormalAttackRoll, performAttack } from './utils/utils';
 
-const ITERATIONS = 100000;
+const ITERATIONS = 1000000;
 
 const basePlayer: Player = {
     attacks: 4,
@@ -62,7 +62,9 @@ const hoarahLouxBonus: Player = {
     bonusDamage: [],
     weapon: {
         ...hoarahLoux.weapon,
-        bonusDamageDice: ['d10']
+        name: 'Integrated Heavy Unarmed',
+        bonusDamageDice: ['d10'],
+        bonusPartOfWeapon: true
     }
 };
 
@@ -77,11 +79,35 @@ const brawlerChampion: Player = {
     }
 };
 
-const players = [basePlayer, glaiveSentinel, gsWar, hoarahLoux, hoarahLouxBonus, brawlerChampion];
+const players: Player[] = [
+    basePlayer,
+    glaiveSentinel,
+    { ...glaiveSentinel, weapon: { ...glaiveSentinel.weapon, modifier: 1 } },
+    { ...glaiveSentinel, weapon: { ...glaiveSentinel.weapon, modifier: 2 } },
+    { ...glaiveSentinel, weapon: { ...glaiveSentinel.weapon, modifier: 3 } },
+    gsWar,
+    { ...gsWar, weapon: { ...gsWar.weapon, modifier: 1 } },
+    { ...gsWar, weapon: { ...gsWar.weapon, modifier: 2 } },
+    { ...gsWar, weapon: { ...gsWar.weapon, modifier: 3 } },
+    hoarahLoux,
+    { ...hoarahLoux, weapon: { ...hoarahLoux.weapon, modifier: 1 } },
+    { ...hoarahLoux, weapon: { ...hoarahLoux.weapon, modifier: 2 } },
+    { ...hoarahLoux, weapon: { ...hoarahLoux.weapon, modifier: 3 } },
+    hoarahLouxBonus,
+    { ...hoarahLouxBonus, weapon: { ...hoarahLouxBonus.weapon, modifier: 1 } },
+    { ...hoarahLouxBonus, weapon: { ...hoarahLouxBonus.weapon, modifier: 2 } },
+    { ...hoarahLouxBonus, weapon: { ...hoarahLouxBonus.weapon, modifier: 3 } },
+    brawlerChampion,
+    { ...brawlerChampion, weapon: { ...brawlerChampion.weapon, modifier: 1 } },
+    { ...brawlerChampion, weapon: { ...brawlerChampion.weapon, modifier: 2 } },
+    { ...brawlerChampion, weapon: { ...brawlerChampion.weapon, modifier: 3 } },
+];
 
 for (let player of players)
 {
     const values = new Array(ITERATIONS).fill(0).map(() => performAttack(player, 20));
     const average = values.reduce((acc, v) => acc + v, 0) / ITERATIONS;
-    console.log(`${player.name} did ${average.toFixed(2)} damage on average, using ${player.weapon.name}.`);
+    console.log(`${player.name} did ${average.toFixed(2)} damage on average, using ${player.weapon.name}${player.weapon.modifier ? `(+${player.weapon.modifier})` : ''}.`);
 }
+console.log('############################################################');
+console.log('Done.');
