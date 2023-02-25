@@ -1,0 +1,17 @@
+{
+  "name": "dnd-simulator",
+  "version": "1.0.0",
+  "description": "",
+  "main": "./src/index.ts",
+  "scripts": {
+    "start": "npx tsc-watch --onSuccess 'node ./output/index.js' --project ./tsconfig.json",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "tsc": "^2.0.4",
+    "tsc-watch": "^6.0.0",
+    "typescript": "^4.9.5"
+  }
+}
